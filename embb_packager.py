@@ -50,9 +50,11 @@ def main(argv):
             
         elif opt in ("-t", "--type"):
             # Payload Type 
-            payload_type = '000000'
+            payload_type = '0000000'
             if arg == 'mbb': 
-                payload_type = '100000'        
+                payload_type = '1000000'
+            elif arg == 'command1':
+                payload_type = '0100000'
         elif opt in ("-c", "--compression"):
             # Compression Flag 
             compression_flag= arg
@@ -61,7 +63,7 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             embb_file = arg 
     
-   print '__EMBB Pacakger__v1.0         '
+   print '__EMBB Pacakger__v2.0         '
    print 'Params:        '
 
    print 'Device ID         ', device_id
@@ -74,46 +76,45 @@ def main(argv):
    print 'Embb Output:'
     
    #building embb container 
-   
-   #deviceID  
    temp = hashlib.sha1()
    temp.update(device_id)
    embb_deviceId = temp.hexdigest()
     
-   #Fileter ID 
+    
    embb_filterId = struct.pack(">H",int(filter_id))
-   
-   #Set payload type 
+    
    embb_payloadType = bitarray(compression_flag+payload_type)
    
-   #Read mbb file 
    in_file = open(input_file, "rb")  
    dataFromFile = in_file.read()  
    in_file.close()
-   
-   #Generate Payload 
+    
    embb_payload = dataFromFile        
    if compression_flag == '1':
         embb_payload = zlib.compress(dataFromFile)
-   
-   #Calculate payload size 
+    
+        
+        
    embb_payloadSize = struct.pack('>H', len(embb_payload))
    
-   #Output Summary  
+   
  
+
    print 'Embb Devcie ID    ', embb_deviceId
    print 'Filter  ID        ', embb_filterId
    print 'Embb Payload Type ', embb_payloadType
    print 'Embb Payload Size ', len(embb_payload)    
    
-   #write to file 
    out_file = open(embb_file, "wb")
    out_file.write(binascii.unhexlify(embb_deviceId))
    out_file.write(embb_filterId)
    embb_payloadType.tofile(out_file)
    out_file.write(embb_payloadSize)
+   #out_file.write(binascii.unhexlify(embb_payloadSize)
    out_file.write(embb_payload)
    out_file.close()
+   
+       
        
 
 if __name__ == "__main__":
